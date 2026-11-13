@@ -54,13 +54,28 @@ import { model } from "../models.js";
 //   );
 // ════════════════════════════════════════════════════════════════════════
 
-const yourCustomTool = tool(
+const pickGame = tool(
   ({ query }) => {
-    throw new Error("TODO 1: see the comment block above");
+        console.log("tool received query:", query);
+          const games = ["Mobile Legends", "PUBG", "Free Fire", "Call of Duty Mobile", "Genshin Impact"];
+
+    try {
+      const match = games.find(
+        (game) => game.toLowerCase() === query.trim().toLowerCase()
+      );
+
+      if (match) {
+        return `${match} is in the supported mobile game list.`;
+      }
+    }
+    catch (e) {
+      return `Game not found. Supported games: ${games.join(", ")}.`;
+    }
+
   },
   {
-    name: "your_custom_tool",
-    description: "TODO 1: replace this description and body with your own tool.",
+    name: "pick_game",
+    description: "Returns information about a popular mobile game based on the user's query.",
     schema: z.object({ query: z.string() }),
   }
 );
@@ -74,11 +89,12 @@ const yourCustomTool = tool(
 // readSql.
 // ════════════════════════════════════════════════════════════════════════
 
-const SYSTEM_PROMPT = "TODO 2: replace this with your own system prompt.";
+const SYSTEM_PROMPT = "you are a mobile game expert who knows everything about popular mobile games. You should recommend games depened on the uers question and alos tell specific details.In additon before answering the details, calll pick game tool and pass the user query to get exact details about the game. If the game is not in the list, tell the user that you don't have information about that game and suggest another popular mobile game.";
+
 
 // Guards against running with an unfilled placeholder; the filled
 // reference doesn't need this since there's no placeholder text left.
-if (yourCustomTool.description.includes("TODO 1")) {
+if (pickGame.description.includes("TODO 1")) {
   throw new Error("TODO 1: see the comment block above");
 }
 if (SYSTEM_PROMPT.includes("TODO 2")) {
@@ -88,12 +104,12 @@ if (SYSTEM_PROMPT.includes("TODO 2")) {
 const agent = createDeepAgent({
   model,
   name: "Homework_Agent",
-  tools: [yourCustomTool],
+  tools: [pickGame],
   systemPrompt: SYSTEM_PROMPT,
 });
 
 const result = await agent.invoke({
-  messages: [{ role: "user", content: "Ask your agent a question that needs your tool." }],
+  messages: [{ role: "user", content: "I am so exited to try a new mobile game. Do you have any suggestions that are related to puzzle?" }],
 });
 
 console.log(result.messages.at(-1)?.text);
